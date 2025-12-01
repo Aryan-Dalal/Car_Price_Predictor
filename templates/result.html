@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Result</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+
+    <div class="result-container">
+        <h2 class="result-title">Prediction Results</h2>
+        <p class="result-subtitle">Your vehicle analysis is complete</p>
+        
+        <div class="result-cards-container">
+            <div class="result-item">
+                <div class="result-icon">
+                    <i class="fas fa-dollar-sign"></i> </div>
+                <div class="result-label">PREDICTED PRICE</div>
+                <div class="result-value" id="priceValue">${{ price }}</div> <div class="result-description">Based on market analysis</div>
+            </div>
+            
+            <div class="result-item">
+                <div class="result-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="result-label">PERFORMANCE SCORE</div>
+                <div class="result-value" id="perfValue">{{ perf }}</div>
+                <div class="result-description">Performance rating</div>
+            </div>
+        </div>
+
+        <div class="performance-section">
+            <div class="performance-header">
+                <div class="performance-title">Performance Level</div>
+                <div class="performance-percentage" id="perfPercentage">{{ perf }}%</div>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+            </div>
+        </div>
+
+        <a href="{{ url_for('index') }}" class="result-link">
+             <i class="fas fa-redo-alt"></i> Predict Another Car
+        </a>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

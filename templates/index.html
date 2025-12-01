@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Price & Performance Prediction</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+
+    <div class="car-container">
+        <h2 class="car-title">Car Price & Performance Prediction</h2>
+        <form method="POST" id="carForm">
+            {% for field in [
+                ('symboling', 'number', 'Enter safety rating score (-3 to 3)'), 
+                ('fueltype', 'select', ['gas', 'diesel']),
+                ('aspiration', 'select', ['std', 'turbo']),
+                ('doornumber', 'select', ['two', 'four']),
+                ('carbody', 'select', ['sedan', 'hatchback', 'wagon', 'hardtop', 'convertible']),
+                ('drivewheel', 'select', ['fwd', 'rwd', '4wd']),
+                ('enginetype', 'select', ['ohc', 'ohcf', 'ohcv', 'dohc', 'rotor', 'l']),
+                ('cylindernumber', 'select', ['two', 'three', 'four', 'five', 'six', 'eight', 'twelve']),
+                ('horsepower', 'number', 'e.g., 100'),
+                ('peakrpm', 'number', 'e.g., 5000'),
+                ('citympg', 'number', 'e.g., 25'),
+                ('highwaympg', 'number', 'e.g., 30')
+            ] %}
+            <div class="car-form-group">
+                <label class="car-label">{{ field[0]|capitalize }}</label>
+                {% if field[1] == 'select' %}
+                <select name="{{ field[0] }}" class="car-select" required>
+                    {% for opt in field[2] %}
+                        <option value="{{ opt }}">{{ opt|capitalize }}</option>
+                    {% endfor %}
+                </select>
+                {% else %}
+                <input type="{{ field[1] }}" 
+                       name="{{ field[0] }}" 
+                       class="car-input" 
+                       placeholder="{{ field[2] }}" 
+                       required
+                       {% if field[0] == 'symboling' %}
+                       min="-3" 
+                       max="3"
+                       step="1" 
+                       {% endif %}
+                >
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <button type="submit" class="car-button">
+                <span>Predict Price & Score 🚀</span>
+            </button>
+        </form>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

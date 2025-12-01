@@ -1,0 +1,295 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    /* Soft, dreamy background gradient from the image */
+    font-family: 'Poppins', sans-serif; 
+    background: linear-gradient(135deg, #f0e6ff 0%, #e0f7fa 100%);
+    min-height: 100vh;
+    overflow-x: hidden;
+    color: #444; /* Darker text for contrast on light background */
+}
+
+/* Particle Background - Adjusted for the softer light theme */
+.particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.particle {
+    position: absolute;
+    /* Soft, light particles */
+    background: rgba(180, 150, 250, 0.2); 
+    border-radius: 50%;
+    animation: float 20s infinite ease-in-out;
+    box-shadow: 0 0 5px rgba(150, 100, 250, 0.1);
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0) scale(1); opacity: 0; }
+    10% { opacity: 0.8; }
+    90% { opacity: 0.8; }
+    100% { transform: translateY(-120vh) scale(1.2); opacity: 0; }
+}
+
+/* Container */
+.car-container, .result-container {
+    position: relative;
+    z-index: 1;
+    max-width: 800px; /* Slightly wider for the result cards */
+    margin: 80px auto;
+    /* Soft white container with subtle shadow */
+    background: rgba(255, 255, 255, 0.85); 
+    backdrop-filter: blur(10px); 
+    padding: 40px 50px;
+    border-radius: 30px;
+    box-shadow: 0 15px 40px rgba(100, 100, 150, 0.1);
+    animation: fadeIn 1s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Titles */
+.car-title, .result-title {
+    text-align: center;
+    font-size: 36px;
+    font-weight: 700;
+    /* Soft purple for the main title */
+    color: #6a1b9a; 
+    margin-bottom: 5px;
+    letter-spacing: 1.5px;
+}
+
+/* Subtitle for result page */
+.result-subtitle {
+    text-align: center;
+    color: #888;
+    font-size: 16px;
+    margin-bottom: 40px;
+}
+
+
+/* --- INPUT FORM STYLING (index.html) --- */
+
+.car-form-group {
+    margin-bottom: 25px;
+}
+
+.car-label {
+    display: block;
+    color: #6a1b9a; 
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.car-input, .car-select {
+    width: 100%;
+    padding: 14px 18px;
+    /* Light input fields with a soft border */
+    background: #ffffff;
+    color: #333;
+    border: 1px solid #e0e0f0;
+    border-radius: 12px;
+    font-size: 16px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    transition: all 0.4s ease;
+    -webkit-appearance: none; 
+    appearance: none;
+}
+
+.car-select option {
+    background-color: #ffffff;
+    color: #333;
+    padding: 10px;
+}
+
+.car-input:focus, .car-select:focus {
+    outline: none;
+    border-color: #9c27b0;
+    box-shadow: 0 0 10px rgba(156, 39, 176, 0.2);
+}
+
+.error {
+    border-color: #e57373 !important;
+}
+
+/* Button - Wide, vibrant gradient button */
+.car-button {
+    width: 100%;
+    padding: 16px;
+    /* Vibrant Purple/Pink gradient */
+    background: linear-gradient(90deg, #6a1b9a 0%, #d81b60 100%);
+    color: white;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 20px rgba(106, 27, 154, 0.3);
+    margin-top: 20px;
+}
+
+.car-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(106, 27, 154, 0.4);
+}
+
+
+/* --- RESULT PAGE STYLING (result.html) --- */
+
+.result-cards-container {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.result-item {
+    flex: 1;
+    min-height: 220px;
+    padding: 30px;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease;
+}
+
+/* Price Card Gradient */
+.result-item:nth-child(1) {
+    background: linear-gradient(135deg, #f4f0ff 0%, #e8e8ff 100%);
+}
+
+/* Performance Card Gradient */
+.result-item:nth-child(2) {
+    background: linear-gradient(135deg, #fff0f5 0%, #ffebee 100%);
+}
+
+.result-item:hover {
+    transform: translateY(-5px);
+}
+
+/* Icon Styling */
+.result-icon {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Price Icon */
+.result-item:nth-child(1) .result-icon {
+    background: linear-gradient(45deg, #6a1b9a, #9c27b0);
+}
+
+/* Performance Icon */
+.result-item:nth-child(2) .result-icon {
+    background: linear-gradient(45deg, #d81b60, #ff4081);
+}
+
+.result-label {
+    color: #666;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 500;
+    margin-top: 70px; /* Push down below the icon */
+    margin-bottom: 5px;
+}
+
+.result-value {
+    font-size: 40px;
+    font-weight: 700;
+    margin-bottom: 5px;
+    /* Use solid color for clarity inside the card */
+    color: #444; 
+}
+
+.result-description {
+    color: #999;
+    font-size: 13px;
+}
+
+/* Performance Level Bar */
+.performance-section {
+    margin-bottom: 40px;
+}
+
+.performance-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.performance-title {
+    color: #444;
+    font-weight: 600;
+}
+
+.performance-percentage {
+    color: #9c27b0;
+    font-weight: 600;
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 12px;
+    background: #eee;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    /* Gradient for the progress bar, matching the overall theme */
+    background: linear-gradient(90deg, #9c27b0 0%, #ff4081 100%);
+    border-radius: 6px;
+    transition: width 1.5s ease-out;
+}
+
+
+.result-link {
+    display: block;
+    width: 100%;
+    padding: 16px 30px;
+    /* Same main button gradient */
+    background: linear-gradient(90deg, #6a1b9a 0%, #d81b60 100%);
+    color: white;
+    border-radius: 15px;
+    text-decoration: none;
+    text-align: center;
+    font-weight: 600;
+    font-size: 18px;
+    transition: 0.3s;
+    box-shadow: 0 8px 20px rgba(106, 27, 154, 0.3);
+}
+
+.result-link:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(106, 27, 154, 0.4);
+}

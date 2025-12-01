@@ -1,0 +1,221 @@
+# ==============================
+# Car Price & Performance Prediction Script
+# ==============================
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder, MinMaxScaler
+from sklearn.linear_model import LinearRegression
+from sklearn.tree import DecisionTreeRegressor, plot_tree
+from sklearn.ensemble import RandomForestRegressor, VotingRegressor
+from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
+from sklearn.multioutput import MultiOutputRegressor
+import joblib
+import os
+
+sns.set(style="whitegrid")
+
+# ------------------------------
+# 1️⃣ Create folders for models & plots
+# ------------------------------
+os.makedirs("models", exist_ok=True)
+os.makedirs("plots", exist_ok=True)
+
+# ------------------------------
+# 2️⃣ Load Dataset
+# ------------------------------
+try:
+    data = pd.read_csv("data/CarPrice_Assignment.csv")  # Update dataset path
+except Exception as e:
+    print("Error loading dataset:", e)
+    exit()
+
+# ------------------------------
+# 3️⃣ Data Preprocessing
+# ------------------------------
+categorical_cols = ['fueltype', 'aspiration', 'doornumber', 'carbody',
+                    'drivewheel', 'enginetype', 'cylindernumber', 'fuelsystem']
+
+le = LabelEncoder()
+for col in categorical_cols:
+    if col in data.columns:
+        data[col] = le.fit_transform(data[col])
+
+# ------------------------------
+# 3️⃣1️⃣ Performance Score Scaling
+# ------------------------------
+perf_raw = ((data['price'] / (data['citympg'] + 1)) * (2025 - data['symboling']))
+scaler = MinMaxScaler(feature_range=(1, 100))
+data['Performance_Score'] = scaler.fit_transform(perf_raw.values.reshape(-1, 1))
+
+# Save scaler for Flask
+joblib.dump(scaler, "models/perf_scaler.pkl")
+
+# ------------------------------
+# 3️⃣2️⃣ Features and Targets
+# ------------------------------
+feature_cols = ['symboling', 'fueltype', 'aspiration', 'doornumber', 'carbody', 
+                'drivewheel', 'enginetype', 'cylindernumber', 'horsepower', 
+                'peakrpm', 'citympg', 'highwaympg']
+
+X = data[feature_cols]
+y_price = data['price']
+y_perf = data['Performance_Score']
+
+# Train-test split
+X_train, X_test, y_price_train, y_price_test = train_test_split(X, y_price, test_size=0.2, random_state=42)
+_, _, y_perf_train, y_perf_test = train_test_split(X, y_perf, test_size=0.2, random_state=42)
+
+# ------------------------------
+# 4️⃣ Linear Regression
+# ------------------------------
+lr = LinearRegression()
+lr.fit(X_train, y_price_train)
+y_pred_lr = lr.predict(X_test)
+
+plt.figure(figsize=(8,6))
+plt.scatter(y_price_test, y_pred_lr, color='blue', alpha=0.6)
+plt.plot([min(y_price_test), max(y_price_test)], [min(y_price_test), max(y_price_test)], 'r--')
+plt.xlabel("Actual Price")
+plt.ylabel("Predicted Price")
+plt.title("Linear Regression: Actual vs Predicted Price")
+plt.savefig("plots/linear_regression_price.png")
+plt.close()
+
+# ------------------------------
+# 5️⃣ Decision Tree Regressor
+# ------------------------------
+dt = DecisionTreeRegressor(random_state=42)
+dt.fit(X_train, y_price_train)
+plt.figure(figsize=(20,10))
+plot_tree(dt, feature_names=X.columns, filled=True, rounded=True)
+plt.title("Decision Tree Structure")
+plt.savefig("plots/decision_tree_structure.png")
+plt.close()
+
+# ------------------------------
+# 6️⃣ Random Forest Regressor
+# ------------------------------
+rf = RandomForestRegressor(n_estimators=100, random_state=42)
+rf.fit(X_train, y_price_train)
+
+feat_importance = pd.Series(rf.feature_importances_, index=X.columns)
+feat_importance.sort_values().plot(kind='barh', figsize=(8,6))
+plt.title("Random Forest Feature Importance")
+plt.savefig("plots/random_forest_feature_importance.png")
+plt.close()
+
+# ------------------------------
+# 7️⃣ Voting Regressor
+# ------------------------------
+voting = VotingRegressor([('lr', lr), ('dt', dt), ('rf', rf)])
+voting.fit(X_train, y_price_train)
+
+# ------------------------------
+# 8️⃣ Multi-output Regressor (Price + Performance)
+# ------------------------------
+multi_rf = MultiOutputRegressor(RandomForestRegressor(n_estimators=100, random_state=42))
+multi_rf.fit(X_train, pd.concat([y_price_train, y_perf_train], axis=1))
+
+# Evaluate
+y_pred_multi = multi_rf.predict(X_test)
+print("R2 Score - Price:", r2_score(y_price_test, y_pred_multi[:,0]))
+print("R2 Score - Performance:", r2_score(y_perf_test, y_pred_multi[:,1]))
+
+plt.figure(figsize=(8,6))
+plt.scatter(y_perf_test, y_pred_multi[:,1], color='purple', alpha=0.6)
+plt.plot([min(y_perf_test), max(y_perf_test)], [min(y_perf_test), max(y_perf_test)], 'r--')
+plt.xlabel("Actual Performance Score")
+plt.ylabel("Predicted Performance Score")
+plt.title("Random Forest: Actual vs Predicted Performance Score")
+plt.savefig("plots/performance_score_prediction.png")
+plt.close()
+
+# ------------------------------
+# 9️⃣ Save Models
+# ------------------------------
+joblib.dump(lr, "models/lr_model.pkl")
+joblib.dump(dt, "models/dt_model.pkl")
+joblib.dump(rf, "models/rf_model.pkl")
+joblib.dump(voting, "models/voting_model.pkl")
+joblib.dump(multi_rf, "models/multi_rf_model.pkl")
+
+print("All models and plots saved successfully.")
+
+
+
+
+
+
+
+from flask import Flask, render_template, request
+import joblib
+import numpy as np
+import os
+
+app = Flask(__name__)
+
+# ------------------------------
+# Load Models and Scaler
+# ------------------------------
+multi_rf = joblib.load(os.path.join("models", "multi_rf_model.pkl"))
+perf_scaler = joblib.load(os.path.join("models", "perf_scaler.pkl"))
+
+# Features and Label Encodings
+feature_cols = [
+    'symboling', 'fueltype', 'aspiration', 'doornumber', 'carbody',
+    'drivewheel', 'enginetype', 'cylindernumber', 'horsepower',
+    'peakrpm', 'citympg', 'highwaympg'
+]
+
+label_map = {
+    'fueltype': {'gas': 0, 'diesel': 1},
+    'aspiration': {'std': 0, 'turbo': 1},
+    'doornumber': {'two': 0, 'four': 1},
+    'carbody': {'sedan': 0, 'hatchback': 1, 'wagon': 2, 'hardtop': 3, 'convertible': 4},
+    'drivewheel': {'fwd': 0, 'rwd': 1, '4wd': 2},
+    'enginetype': {'ohc': 0, 'ohcf': 1, 'ohcv': 2, 'dohc': 3, 'rotor': 4, 'l': 5},
+    'cylindernumber': {'two': 0, 'three': 1, 'four': 2, 'five': 3, 'six': 4, 'eight': 5, 'twelve': 6}
+}
+
+# ------------------------------
+# Flask Routes
+# ------------------------------
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+        try:
+            input_data = []
+            for col in feature_cols:
+                val = request.form.get(col)
+                if not val:
+                    return f"Error: Missing value for {col}"
+                if col in label_map:
+                    val = label_map[col][val.lower()]
+                input_data.append(float(val))
+
+            input_array = np.array([input_data])
+            prediction = multi_rf.predict(input_array)
+
+            price_pred = round(prediction[0][0], 2)
+
+            # Performance Score scaling
+            citympg = float(request.form.get('citympg'))
+            symboling = float(request.form.get('symboling'))
+            raw_perf = (price_pred / (citympg + 1)) * (2025 - symboling)
+            perf_pred = perf_scaler.transform(np.array([[raw_perf]]))[0][0]
+            perf_pred = round(perf_pred, 2)
+
+            return render_template('result.html', price=price_pred, perf=perf_pred)
+
+        except Exception as e:
+            return f"An error occurred: {e}"
+
+    return render_template('index.html')
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
